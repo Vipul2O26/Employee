@@ -19,7 +19,7 @@ namespace Employee.Model
 
         [Required]
         [MaxLength(255)] // Store hashed password
-        public string Password { get; set; }
+        public string Password { get; set; } //
 
     }
 }
