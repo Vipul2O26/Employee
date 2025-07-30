@@ -1,4 +1,4 @@
-﻿using Employee.Model;
+﻿using Employee.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddDbContext<EmployeeDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ExamDbConnectionString")));
 
 builder.Services.AddEndpointsApiExplorer();
