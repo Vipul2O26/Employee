@@ -17,5 +17,9 @@ namespace Employee.Models
         public bool IsCompleted { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? DueDate { get; set; }
+        public string Priority { get; set; } = "Normal"; // e.g., Low, Normal, High
+
     }
 }

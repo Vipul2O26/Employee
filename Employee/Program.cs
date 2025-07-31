@@ -26,7 +26,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ✅ Enable CORS before any endpoints
 app.UseCors("allowCors");
 
 if (app.Environment.IsDevelopment())
