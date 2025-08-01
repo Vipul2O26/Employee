@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Security.Cryptography;
+using System.Text;
+using BCrypt.Net;
 using Employee.Data;
 using Employee.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Employee.Controllers
 {
@@ -21,88 +19,59 @@ namespace Employee.Controllers
             _context = context;
         }
 
-        // GET: api/Users
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Register(UserDto request)
         {
-            return await _context.Users.ToListAsync();
-        }
-
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
-                return NotFound();
+                return BadRequest("Email already exists.");
             }
 
-            return user;
-        }
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
-        {
-            if (id != user.UserId)
+            var user = new User
             {
-                return BadRequest();
-            }
+                Email = request.Email,
+                Name = request.Name,
+                PasswordHash = passwordHash
+            };
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            return Ok(new { message = "User registered successfully." });
         }
 
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        
+        [HttpPost("login")]
+        public async Task<ActionResult> Login(LoginDto request)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null)
             {
-                return NotFound();
+                return BadRequest("Invalid email.");
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            {
+                return BadRequest("Invalid password.");
+            }
 
-            return NoContent();
+            return Ok(new { message = "Login successful." });
         }
+    }
 
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.UserId == id);
-        }
+    public class UserDto
+    {
+        public string Email { get; set; }
+        public string Name { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class LoginDto
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }
