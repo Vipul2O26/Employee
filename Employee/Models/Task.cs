@@ -19,7 +19,13 @@ namespace Employee.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? DueDate { get; set; }
-        public string Priority { get; set; } = "Normal"; 
+        public string Priority { get; set; } = "Normal";
+        // Foreign key
+        public int UserId { get; set; }
+
+        // Navigation property
+        public User User { get; set; }
+
 
     }
 }
