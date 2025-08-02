@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Employee.Models
 {
@@ -20,11 +21,13 @@ namespace Employee.Models
 
         public DateTime? DueDate { get; set; }
         public string Priority { get; set; } = "Normal";
-        // Foreign key
+
+
+        [ForeignKey("User")]
         public int UserId { get; set; }
 
-        // Navigation property
-        public User User { get; set; }
+        // 🔧 Make navigation property optional
+        public User? User { get; set; }
 
 
     }
